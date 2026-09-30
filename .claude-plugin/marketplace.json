@@ -1,0 +1,6 @@
+{
+  "name": "find-me",
+  "owner": {"name": "ChangRoro"},
+  "metadata": {"description": "Claude Code용 Find Me 플러그인"},
+  "plugins": [{"name": "find-me", "source": "./", "description": "대화 속 자기 발견과 개인 프롬프트", "category": "productivity"}]
+}

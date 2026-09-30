@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+config.json
+*.local.json
+node_modules/
+media/*/stills/
+media/*/qa/
+media/*/assets/fonts/
+*.mp4

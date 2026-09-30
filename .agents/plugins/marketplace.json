@@ -1,0 +1,10 @@
+{
+  "name": "find-me",
+  "interface": {"displayName": "Find Me"},
+  "plugins": [{
+    "name": "find-me",
+    "source": {"source": "local", "path": "./"},
+    "policy": {"installation": "AVAILABLE", "authentication": "ON_USE"},
+    "category": "Productivity"
+  }]
+}
