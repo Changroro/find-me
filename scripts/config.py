@@ -105,7 +105,14 @@ def fix(config_path, prompt, expected):
         save(config_path, settings)
 
 
-def append(config_path, content, expected):
+def history(config_path):
+    settings, _ = load(config_path)
+    record = validate(settings, config_path)
+    raw = record.read_bytes() if record.exists() else b""
+    return {"record_path": str(record), "revision": hashlib.sha256(raw).hexdigest(), "content": raw.decode("utf-8")}
+
+
+def append(config_path, content, expected, expected_history):
     if not content.strip():
         raise ValueError("빈 기록은 추가할 수 없습니다.")
     with locked(config_path):
@@ -114,12 +121,15 @@ def append(config_path, content, expected):
             raise ValueError("설정이 변경되었습니다. 현재 프롬프트로 기록을 다시 작성하세요.")
         record = validate(settings, config_path)
         with locked(record):
-            existing = record.read_text(encoding="utf-8") if record.exists() else ""
+            raw = record.read_bytes() if record.exists() else b""
+            if hashlib.sha256(raw).hexdigest() != expected_history:
+                raise ValueError("기록이 변경되었습니다. 최신 기록과 다시 비교하세요.")
+            existing = raw.decode("utf-8")
             heading = f"## {date.today().isoformat()}"
             dates = list(re.finditer(r"^## \d{4}-\d{2}-\d{2}$", existing, re.MULTILINE))
             today = dates and dates[-1].group() == heading
             content = content.strip()
-            if today and f"\n{content}\n" in f"\n{existing[dates[-1].end():].strip()}\n":
+            if f"\n{content}\n" in f"\n{existing.strip()}\n":
                 return False
             prefix = "" if existing else "# 나에 대해\n"
             if not today:
@@ -136,12 +146,16 @@ def main():
     parser.add_argument("--config", default=os.environ.get("FIND_ME_CONFIG", str(Path.home() / ".config/find-me/config.json")))
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("show")
+    commands.add_parser("history")
     commands.add_parser("template")
     setup_parser = commands.add_parser("setup")
     setup_parser.add_argument("--record-path", required=True)
     setup_parser.add_argument("--topics", nargs="+", required=True)
     for command in ("fix", "append"):
-        commands.add_parser(command).add_argument("--expected", required=True)
+        command_parser = commands.add_parser(command)
+        command_parser.add_argument("--expected", required=True)
+        if command == "append":
+            command_parser.add_argument("--expected-history", required=True)
     args = parser.parse_args()
     if args.command == "template":
         print(DEFAULT.read_text(encoding="utf-8"), end="")
@@ -153,11 +167,13 @@ def main():
     elif args.command == "show":
         settings, revision = load(config_path)
         print(json.dumps({"config_path": str(config_path), "revision": revision, "settings": settings}, ensure_ascii=False, indent=2))
+    elif args.command == "history":
+        print(json.dumps(history(config_path), ensure_ascii=False, indent=2))
     elif args.command == "fix":
         fix(config_path, sys.stdin.read(), args.expected)
         print(f"find-me: 프롬프트 수정 완료 → {config_path}")
     elif args.command == "append":
-        written = append(config_path, sys.stdin.read(), args.expected)
+        written = append(config_path, sys.stdin.read(), args.expected, args.expected_history)
         print("find-me: 기록함" if written else "find-me: 이미 기록한 내용")
 
 

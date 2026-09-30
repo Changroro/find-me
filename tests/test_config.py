@@ -57,17 +57,26 @@ class ConfigTests(unittest.TestCase):
         self.initialize()
         _, revision = config.load(self.config_path)
         entry = "- #가치관 기록의 활용도를 중요하게 여긴다. 대화 맥락: 기록의 쓸모를 점검했다."
-        self.assertTrue(config.append(self.config_path, entry, revision))
+        self.assertTrue(config.append(self.config_path, entry, revision, config.history(self.config_path)["revision"]))
         before = self.record_path.read_text(encoding="utf-8")
         self.assertIn(f"## {date.today().isoformat()}", before)
-        self.assertFalse(config.append(self.config_path, entry, revision))
+        self.assertFalse(config.append(self.config_path, entry, revision, config.history(self.config_path)["revision"]))
         self.assertEqual(self.record_path.read_text(encoding="utf-8"), before)
         config.fix(self.config_path, "짧은 문단 형식으로 기록한다.", revision)
         with self.assertRaises(ValueError):
-            config.append(self.config_path, "이전 프롬프트의 기록", revision)
+            config.append(self.config_path, "이전 프롬프트의 기록", revision, config.history(self.config_path)["revision"])
         _, current = config.load(self.config_path)
-        self.assertTrue(config.append(self.config_path, "새 개인 프롬프트의 문단 기록.", current))
+        self.assertTrue(config.append(self.config_path, "새 개인 프롬프트의 문단 기록.", current, config.history(self.config_path)["revision"]))
         self.assertTrue(self.record_path.read_text(encoding="utf-8").startswith(before))
+
+    def test_duplicate_record_from_an_earlier_day_is_not_appended(self):
+        self.initialize()
+        _, revision = config.load(self.config_path)
+        entry = "- #습관 수정 전에 변경 이유를 이해하려 한다. 대화 맥락: 이유를 먼저 설명해 달라고 말했다."
+        self.record_path.write_text(f"# 나에 대해\n\n## 2020-01-01\n\n{entry}\n", encoding="utf-8")
+        before = self.record_path.read_bytes()
+        self.assertFalse(config.append(self.config_path, entry, revision, config.history(self.config_path)["revision"]))
+        self.assertEqual(self.record_path.read_bytes(), before)
 
     def test_missing_invalid_and_empty_settings_fail_without_default_fallback(self):
         with self.assertRaises(ValueError):
@@ -81,6 +90,32 @@ class ConfigTests(unittest.TestCase):
         self.config_path.write_text("{잘못된 JSON}", encoding="utf-8")
         with self.assertRaises(ValueError):
             config.load(self.config_path)
+
+    def test_history_includes_old_records_and_stale_comparisons_cannot_write(self):
+        self.initialize()
+        snapshot = config.history(self.config_path)
+        self.assertEqual(snapshot["content"], "")
+        empty_revision = snapshot["revision"]
+        _, revision = config.load(self.config_path)
+        previous = "# 나에 대해\n\n## 2020-01-01\n\n- #습관 이전 발견. 대화 맥락: 과거 발언.\n"
+        self.record_path.write_text(previous, encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "최신 기록과 다시 비교"):
+            config.append(self.config_path, "새로운 발견", revision, snapshot["revision"])
+        self.assertEqual(self.record_path.read_text(encoding="utf-8"), previous)
+        snapshot = config.history(self.config_path)
+        self.assertEqual(snapshot["content"], previous)
+        self.assertNotEqual(snapshot["revision"], empty_revision)
+        self.assertTrue(config.append(self.config_path, "새로운 발견", revision, snapshot["revision"]))
+
+    def test_cli_append_without_history_revision_is_rejected(self):
+        self.initialize()
+        _, revision = config.load(self.config_path)
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/config.py"), "--config", str(self.config_path), "append", "--expected", revision],
+            input="임의 기록", capture_output=True, text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.record_path.exists())
 
     def test_paths_topics_and_locks_prevent_unsafe_writes(self):
         for path in ("relative.md", str(ROOT / "config.json")):

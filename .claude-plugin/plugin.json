@@ -1,6 +1,6 @@
 {
   "name": "find-me",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "대화에서 자신을 발견하고, 개인 프롬프트와 실제 대화 맥락으로 기록하는 플러그인",
   "author": {"name": "ChangRoro", "url": "https://github.com/Changroro"},
   "repository": "https://github.com/Changroro/find-me",
