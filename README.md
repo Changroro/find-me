@@ -15,9 +15,9 @@
 
 ## 소개 영상
 
-https://github.com/user-attachments/assets/df8549bd-b5f0-4dc5-947d-41e26d25903c
+https://github.com/user-attachments/assets/d15aad84-9fb2-4147-84dd-c08762620e9b
 
-노트북을 든 개발자가 AI 포모로 지쳐 있다가 자신의 습관과 기준을 발견해 가는 30초 한국어 손그림 영상입니다.
+AI를 많이 쓰면서도 자신의 역량을 잘 모르겠는 개발자가, 포모 속에서 자신을 알아가는 30초 한국어 handdrawn 영상입니다.
 
 ## 프로젝트 소개
 

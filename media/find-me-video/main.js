@@ -1,163 +1,137 @@
 'use strict';
-Object.assign(HD, {accent:'#26786b',tag:'#e3ece6'});
 Object.assign(THEME, {ink:HD.ink,paper:HD.paper,dark:HD.dark});
 
-const face={'.':'transparent',h:HD.ink,s:'#dacdb9',e:HD.ink,b:HD.accent,p:HD.ink,l:'#a5b0aa',c:'#f4f2ee'};
-const standing=[
-  '......hhhhhh.......',
-  '.....hhhhhhhh......',
-  '.....hssssssh......',
-  '.....hsessesh......',
-  '......ssssss.......',
-  '.......ssss........',
-  '.....bbbbbbbb......',
-  '....bbbbbbbbbb.....',
-  '....bsllllllll.....',
-  '....bsllccccll.....',
-  '.....sllccccll.....',
-  '.....bllllllll.....',
-  '.....bllllllll.....',
-  '.....bbbbbbbb......',
-  '......pppppp.......',
-  '......pp..pp.......',
-  '......pp..pp.......',
-  '.....ppp..ppp......'
-];
-const sitting=[
-  '......hhhhhh.......',
-  '.....hhhhhhhh......',
-  '.....hssssssh......',
-  '.....hsessesh......',
-  '......ssssss.......',
-  '.......ssss........',
-  '.....bbbbbbbb......',
-  '....bbbbbbbbbb.....',
-  '....bsllllllll.....',
-  '....bsllccccll.....',
-  '.....sllccccll.....',
-  '.....bllllllll.....',
-  '.....bllllllll.....',
-  '.....bbbbbbbb......',
-  '.....pppppppppp....',
-  '.....pp......pp....',
-  '.....pp.....ppp....',
-  '....ppp............'
-];
-
-function dev(x,y,t,{size=14,tired=false,sit=false,walk=false}={}) {
-  const bob=walk?Math.sin(t*8)*5:Math.sin(t*2)*2;
-  shadow(x,y+3,110);
-  drawPixels(sit?sitting:standing,{...face,b:tired?'#888781':HD.accent},x,y+bob,size,{rot:tired?.07:0});
-  if (tired) {
-    rc.line(x-36,y-205,x-16,y-200,hdLine(70));
-    rc.line(x+6,y-200,x+26,y-205,hdLine(71));
-    text('…',x+150,y-215,{font:HD.script,size:70,color:HD.muted,jit:false});
+function developer(x,y,t,{scale=1,tired=false,sit=false,walk=false}={}) {
+  shadow(x,y+3,82*scale);
+  ctx.save();
+  ctx.translate(x,y+(walk?Math.sin(t*7)*3:Math.sin(t*2)*1.5));
+  ctx.scale(scale,scale);
+  const leg=walk?Math.sin(t*7)*7:0;
+  rc.line(-18,-42,sit?-57:-20+leg,-4,hdLine(41,{strokeWidth:7}));
+  rc.line(18,-42,sit?55:22-leg,-4,hdLine(42,{strokeWidth:7}));
+  rc.ellipse(sit?-65:-27+leg,0,32,12,hdLine(43,{fill:HD.ink,fillStyle:'solid'}));
+  rc.ellipse(sit?64:29-leg,0,32,12,hdLine(44,{fill:HD.ink,fillStyle:'solid'}));
+  ctx.save();
+  ctx.translate(tired?7:0,tired?15:0);
+  ctx.rotate(tired?.08:0);
+  rc.ellipse(0,-88,104,120,hdLine(45,{fill:HD.accent,fillStyle:'solid'}));
+  rc.line(-35,-114,-70,-71,hdLine(46,{strokeWidth:8}));
+  rc.line(35,-114,70,-71,hdLine(47,{strokeWidth:8}));
+  rc.line(0,-145,0,-132,hdLine(48,{strokeWidth:8}));
+  rc.ellipse(0,-185,100,96,hdLine(49,{fill:HD.paper,fillStyle:'solid',strokeWidth:3}));
+  rc.polygon([[-47,-193],[-47,-217],[-27,-237],[0,-239],[28,-229],[47,-207],[46,-191],[25,-198],[5,-211],[-15,-199]],hdLine(50,{fill:HD.ink,fillStyle:'solid',roughness:.7}));
+  const blink=Math.sin(t*2.5)>.985;
+  if(tired||blink){
+    rc.line(-27,-184,-12,-181,hdLine(51));
+    rc.line(12,-181,27,-184,hdLine(52));
+  }else{
+    rc.circle(-19,-181,8,hdLine(51,{fill:HD.ink,fillStyle:'solid'}));
+    rc.circle(19,-181,8,hdLine(52,{fill:HD.ink,fillStyle:'solid'}));
   }
-}
-function title(lines,y=185,{size=90,color=HD.ink,p=1}={}) {
-  lines.forEach((line,i)=>text(line,W/2,y+i*(size+24),{font:HD.serif,size,color,jit:false,alpha:prog(p,i*.12,i*.12+.45),maxW:1700}));
-}
-function tag(label) {
-  text(label,100,72,{font:HD.mono,size:22,color:HD.muted,align:'left',jit:false});
-}
-function foot(label,color=HD.muted) {
-  text(label,W/2,990,{font:HD.sans,size:28,color,jit:false});
-}
-function note(x,y,w,h,label,lines,p,id) {
-  ctx.save();ctx.globalAlpha=prog(p,0,.4);
-  rc.rectangle(x,y,w,h,hdLine(id,{fill:HD.paper,fillStyle:'solid'}));
-  text(label,x+32,y+45,{font:HD.script,size:40,color:HD.accent,align:'left',jit:false});
-  lines.forEach((line,i)=>text(line,x+32,y+115+i*56,{font:HD.sans,size:36,align:'left',jit:false,maxW:w-64}));
+  rc.curve(tired?[[-11,-156],[0,-161],[11,-156]]:[[-11,-160],[0,-155],[11,-160]],hdLine(53));
+  rc.rectangle(-61,-122,122,76,hdLine(54,{fill:HD.paper,fillStyle:'solid',strokeWidth:3}));
+  rc.rectangle(-50,-111,100,52,hdLine(55,{stroke:HD.muted,strokeWidth:1.3}));
+  rc.line(-34,-96,-8,-96,hdLine(56,{stroke:HD.accent}));
+  rc.line(-34,-83,30,-83,hdLine(57,{stroke:HD.accent}));
+  rc.polygon([[-61,-46],[61,-46],[79,-27],[-79,-27]],hdLine(58,{fill:HD.paper,fillStyle:'solid',strokeWidth:2.5}));
+  rc.line(-44,-36,44,-36,hdLine(59,{stroke:HD.muted,strokeWidth:1.5}));
+  rc.ellipse(-66,-72,15,25,hdLine(60,{fill:HD.paper,fillStyle:'solid'}));
+  rc.ellipse(66,-72,15,25,hdLine(61,{fill:HD.paper,fillStyle:'solid'}));
+  ctx.restore();
+  if(tired)text('…',116,-210,{font:HD.script,size:54,color:HD.muted,jit:false});
   ctx.restore();
 }
-function wordmark(y,size,p,color=HD.ink) {
-  text('find-me',W/2,y,{font:HD.serif,size,color,jit:false,reveal:p});
+
+function headline(lines,y=165,{size=86,p=1,color=HD.ink}={}) {
+  lines.forEach((line,i)=>text(line,W/2,y+i*(size+25),{font:HD.serif,size,color,jit:false,alpha:prog(p,i*.12,i*.12+.4),maxW:1720}));
+}
+function label(s) {
+  text(s,100,66,{font:HD.mono,size:24,color:HD.muted,align:'left',jit:false});
+}
+function caption(s,y=985,p=1) {
+  text(s,W/2,y,{font:HD.script,size:42,color:HD.accent,jit:false,alpha:prog(p,0,.45),maxW:1710});
+}
+function paper(x,y,w,h,labelText,lines,p,id) {
+  ctx.save();ctx.globalAlpha=prog(p,0,.4);
+  rc.rectangle(x,y,w,h,hdLine(id,{fill:HD.paper,fillStyle:'solid'}));
+  text(labelText,x+32,y+45,{font:HD.script,size:40,color:HD.accent,align:'left',jit:false,maxW:w-64});
+  lines.forEach((line,i)=>text(line,x+32,y+115+i*57,{font:HD.sans,size:36,align:'left',jit:false,maxW:w-64}));
+  ctx.restore();
+}
+function skillTitle(name,action,t) {
+  hdPaper();
+  text('find-me',100,66,{font:HD.serif,size:34,color:HD.muted,align:'left',jit:false});
+  text('find-me:'+name,W/2,155,{font:HD.mono,size:72,jit:false,reveal:prog(t,.05,.8),maxW:1700});
+  const w=measure('find-me:'+name,HD.mono,72);
+  sketch([[W/2-w/2,209],[W/2,217],[W/2+w/2,209]],prog(t,.5,1.1),190,{stroke:HD.accent,strokeWidth:4});
+  text(action,W/2,305,{font:HD.serif,size:62,jit:false,alpha:prog(t,.4,.9),maxW:1700});
+}
+function wordmark(y,size,p) {
+  text('find-me',W/2,y,{font:HD.serif,size,jit:false,reveal:p});
   const w=measure('find-me',HD.serif,size);
-  sketch([[W/2-w/2,y+size*.43],[W/2,y+size*.48],[W/2+w/2,y+size*.42]],prog(p,.65,1),810,{stroke:HD.accent,strokeWidth:5,roughness:.8});
+  sketch([[W/2-w/2,y+size*.43],[W/2,y+size*.48],[W/2+w/2,y+size*.42]],prog(p,.65,1),810,{stroke:HD.accent,strokeWidth:5});
 }
 
 boot({
   noise:2,
-  fonts:[['SERIF','나 find-me'],['SCRIPT','내 기준'],['SANS','기록'],['MONO','설정']],
+  fonts:[['SERIF','나 find-me'],['SCRIPT','내 기준'],['SANS','기록'],['MONO','setup']],
   scenes:[
-    [0,4,t=>{
-      hdPaper();tag('쫓기는 하루 · AI 포모');
-      title(['또 새로운 AI.','나는 또 뒤처진 걸까?'],170,{size:90,p:t});
-      horizon(865);cloud(210+t*12,450,.8,101);cloud(1620-t*8,440,.7,103);
-      [['새 모델 등장',360,545],['새로운 도구',1510,520],['오늘도 따라잡기',1350,690]].forEach(([label,x,y],i)=>{
-        const p=prog(t,i*.65+.4,i*.65+1);
+    [0,5,t=>{
+      hdPaper();label('계속 쏟아지는 소식 · AI 포모');
+      headline(['새 모델, 새 뉴스, 또 새 모델.','나만 뒤처지는 걸까?'],150,{p:t});
+      horizon(885);cloud(170+t*8,462,.7,101);cloud(1710-t*6,456,.6,102);
+      [['새 모델 출시',350,555],['새 AI 뉴스',1510,520],['또 새 모델 출시',1460,702]].forEach(([s,x,y],i)=>{
+        const p=prog(t,.35+i*.55,.9+i*.55);
         ctx.save();ctx.globalAlpha=p;
-        rc.rectangle(x-155,y-40,310,80,hdLine(200+i,{fill:HD.paper,fillStyle:'solid'}));
-        text(label,x,y,{font:HD.script,size:38,color:HD.muted,jit:false});ctx.restore();
+        rc.rectangle(x-175,y-45,350,90,hdLine(110+i,{fill:HD.paper,fillStyle:'solid'}));
+        text(s,x,y,{font:HD.script,size:43,color:HD.muted,jit:false});ctx.restore();
       });
-      dev(940,865,t,{tired:t>2});
-      foot('새 소식을 쫓다 보니, 내 목소리가 작아졌다.');
+      developer(W/2,885,t,{scale:1.15,tired:t>2.4});
+      caption('따라잡으려 할수록, 마음은 더 조급해진다.',985,t-1.2);
     }],
-    [4,7,t=>{
-      hdPaper();tag('잠시 멈춤');
-      title(['다 따라가려 할수록,','나는 더 지쳐갔다.'],180,{size:88,p:t});
-      horizon(865);cloud(1450,490,.9,304);
-      dev(W/2,865,t,{tired:true,sit:true,size:15});
-      sketch([[760,565],[900,525],[1080,590],[1110,520],[980,485],[780,520]],prog(t,0,.8),310,{stroke:HD.muted,strokeWidth:2});
-      foot('잠깐. 나는 어떤 개발자이고 싶지?');
-      if(t>2.5)paperTear(prog(t,2.5,3),HD.dark);
-    }],
-    [7,10,t=>{
-      hdDark();
-      text('나를 돌아보는 시간',W/2,260,{font:HD.serif,size:38,color:HD.light,jit:false,alpha:prog(t,0,.4)});
-      wordmark(480,180,prog(t,.15,1.2),HD.light);
-      text('대화 속에서, 나를 발견하다.',W/2,675,{font:HD.script,size:60,color:'#b9d5ca',jit:false,alpha:prog(t,.8,1.3)});
-      dev(W/2,965,t,{size:10});
+    [5,10,t=>{
+      hdPaper();label('AI와 일하는 나');
+      headline(['AI는 많이 쓰는데,','나는 뭘 잘하는 걸까?'],155,{p:t});
+      horizon(885);developer(430,885,t,{scale:1.25,tired:true,sit:true});
+      paper(795,455,800,280,'해낸 일은 쌓이는데',['내가 한 판단은 무엇일까?','내가 이해한 건 무엇일까?'],t,210);
+      rc.curve([[605,545],[635,505],[675,558],[645,590],[640,621]],hdLine(220,{stroke:HD.muted}));
+      rc.circle(640,646,6,hdLine(221,{fill:HD.muted,fillStyle:'solid'}));
+      caption('도구를 쓰는 나와, 나의 역량 사이에서.',985,t-.7);
     }],
     [10,15,t=>{
-      hdPaper();tag('내가 고르는 주제');
-      title(['남의 속도 말고,','나의 기준을.'],150,{size:82,p:t});
-      horizon(870);dev(385,870,t,{size:13});
-      note(720,435,750,310,'무엇을 알아가고 싶은가요?',['나의 습관','나의 가치관','나의 일하는 방식'],t,410);
-      ['습관','가치관','일하는방식'].forEach((label,i)=>{
-        const p=prog(t,.7+i*.4,1.2+i*.4);
-        sketch([[1300,520+i*56],[1312,532+i*56],[1340,503+i*56]],p,430+i,{stroke:HD.accent,strokeWidth:4});
-      });
-      text('기본 프롬프트 → 나의 프롬프트',1100,815,{font:HD.script,size:40,color:HD.accent,jit:false,alpha:prog(t,1.8,2.4)});
-      foot('/find-me:setup');
+      skillTitle('setup','내가 알아갈 주제부터 정한다.',t);
+      horizon(885);developer(370,885,t,{scale:1.15});
+      paper(690,435,890,310,'내가 알고 싶은 주제',['나의 일하는 방식','나의 판단 기준','나의 고민'],t-.6,310);
+      [0,1,2].forEach(i=>sketch([[1430,547+i*57],[1444,559+i*57],[1477,529+i*57]],prog(t,.8+i*.4,1.4+i*.4),320+i,{stroke:HD.accent,strokeWidth:4}));
+      text('기록 문서: 나의 기록.md',1135,805,{font:HD.mono,size:32,color:HD.muted,jit:false,alpha:prog(t,1.8,2.3)});
+      caption('주제와 저장 위치를, 내게 맞게.',985,t-.9);
     }],
     [15,20,t=>{
-      hdPaper();tag('대화에서 발견한 나');
-      title(['나는 바꾸기 전에,','이유부터 이해하고 싶다.'],135,{size:78,p:t});
-      horizon(895);dev(285,895,t,{size:11});
-      note(580,420,570,275,'발견',['변경에 앞서 이유와 범위를','먼저 이해하려는 모습이 보인다.'],t,510);
-      note(1220,420,570,275,'대화 맥락',['패치 전에 변경 범위를','설명해 달라고 요청했다.'],t-.45,520);
-      arrow([[1165,560],[1187,556],[1205,560]],prog(t,.8,1.4),530,{stroke:HD.accent,strokeWidth:3});
-      text('나의 말이, 나를 이해하는 단서가 된다.',1170,795,{font:HD.script,size:42,color:HD.accent,jit:false,alpha:prog(t,1.1,1.7)});
-      foot('/find-me:write-record');
+      skillTitle('write-record','내 대화에서, 나를 발견한다.',t);
+      horizon(890);developer(260,890,t,{scale:1.05});
+      paper(540,455,555,270,'내가 직접 한 말',['“변경 이유를 알고','진행하는 게 좋아요.”'],t-.5,410);
+      paper(1190,455,605,270,'기록에서 발견한 나',['변경 이유를 이해한 뒤','진행하는 방식을 선호한다.'],t-1.1,420);
+      arrow([[1110,590],[1135,586],[1170,590]],prog(t,1,1.7),430,{stroke:HD.accent,strokeWidth:3});
+      text('이전 기록과 비교 · 발견 + 실제 대화 맥락',1150,815,{font:HD.script,size:39,color:HD.accent,jit:false,alpha:prog(t,1.5,2)});
+      caption('나의 말과 선택이, 나를 이해하는 단서가 된다.',985,t-1.2);
     }],
-    [20,24,t=>{
-      hdPaper();tag('내 방식으로 다듬기');
-      title(['“너무 추상적이야.”','“내가 한 말을 더 담아줘.”'],135,{size:78,p:t});
-      horizon(880);dev(470,880,t,{size:13});
-      note(820,445,850,270,'내 피드백으로 바뀌는 개인 프롬프트',['발견은 한 문장으로.','맥락에는 내가 실제로 한 요구를.'],t,610);
-      sketch([[848,565],[1030,568],[1205,563]],prog(t,.8,1.5),630,{stroke:HD.accent,strokeWidth:4});
-      text('다음 기록부터, 내 방식으로.',1230,805,{font:HD.script,size:46,color:HD.accent,jit:false,alpha:prog(t,1.2,1.8)});
-      foot('/find-me:fix-record');
-      if(t>3.4)paperTear(prog(t,3.4,4),HD.accent);
+    [20,25,t=>{
+      skillTitle('fix-record','피드백으로, 내 기록을 다듬는다.',t);
+      horizon(885);developer(370,885,t,{scale:1.15});
+      paper(720,445,870,305,t<2.7?'내 피드백':'다음 기록',t<2.7?['“내 말과 상황을','더 구체적으로 담아줘.”']:['내가 실제로 한 말과','판단 이유를 구체적으로 남긴다.'],t-.5,510);
+      sketch([[754,626],[1030,632],[1430,626]],prog(t,1.3,2),520,{stroke:HD.accent,strokeWidth:4});
+      text('개인 프롬프트 수정 → 다음 기록부터 반영',1150,813,{font:HD.script,size:39,color:HD.accent,jit:false,alpha:prog(t,2,2.5)});
+      caption('기록도, 나에게 맞는 방식으로.',985,t-1.2);
     }],
-    [24,27,t=>{
-      ctx.fillStyle=HD.accent;ctx.fillRect(0,0,W,H);
-      title(['나를 알수록,','나의 방향이 보인다.'],160,{size:90,color:HD.light,p:t});
-      sketch([[260,905],[670,905],[670,835],[1060,835],[1060,755],[1570,755]],1,710,{stroke:HD.light,strokeWidth:3,roughness:.7});
-      [['나의 습관',470,955],['나의 기준',870,890],['나의 속도',1370,810]].forEach(([label,x,y],i)=>text(label,x,y,{font:HD.script,size:36,color:HD.light,jit:false,alpha:prog(t,i*.4,i*.4+.5)}));
-      const [x,y]=camKeys(t,[[0,370,905],[.6,580,905],[1,730,835],[1.6,950,835],[2,1120,755],[2.7,1480,755]]);
-      dev(x,y,t,{size:12,walk:true});
-    }],
-    [27,30,t=>{
+    [25,30,t=>{
       hdPaper();
-      text('남의 속도를 쫓던 내가,',W/2,165,{font:HD.serif,size:64,jit:false,alpha:prog(t,0,.4)});
-      text('나의 방향을 찾는다.',W/2,275,{font:HD.serif,size:78,color:HD.accent,jit:false,alpha:prog(t,.15,.6)});
-      wordmark(495,140,prog(t,.1,.9));
-      text('Claude Code · Codex',W/2,655,{font:HD.sans,size:30,jit:false,alpha:prog(t,.5,.9)});
-      text('github.com/Changroro/find-me',W/2,722,{font:HD.mono,size:30,color:HD.accent,jit:false,alpha:prog(t,.7,1.1)});
-      horizon(925);dev(lerp(510,690,E.out(prog(t,0,2.3))),925,t,{size:10,walk:t<2.3});cloud(1510,845,.5,910);
-      text('손그림 스타일 참고: @nahiddotai',W-70,H-37,{font:HD.sans,size:18,color:HD.muted,align:'right',jit:false});
+      headline(['남의 속도를 쫓던 내가,','나의 방향을 찾아간다.'],145,{size:79,p:t});
+      wordmark(475,148,prog(t,.4,1.2));
+      text('setup · write-record · fix-record',W/2,660,{font:HD.mono,size:36,color:HD.accent,jit:false,alpha:prog(t,1,1.5),maxW:1710});
+      text('Claude Code · Codex',W/2,734,{font:HD.sans,size:30,jit:false,alpha:prog(t,1.2,1.7)});
+      text('github.com/Changroro/find-me',W/2,800,{font:HD.mono,size:28,color:HD.muted,jit:false,alpha:prog(t,1.4,1.9)});
+      horizon(965);developer(lerp(350,640,E.inOut(prog(t,0,3.9))),965,t,{scale:.8,walk:t<3.9});cloud(1590,903,.45,610);
+      text('손그림 스타일 참고: @nahiddotai',W-70,H-34,{font:HD.sans,size:18,color:HD.muted,align:'right',jit:false});
     }]
   ]
 });
